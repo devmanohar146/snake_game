@@ -11,6 +11,7 @@ let snake;
 let food;
 let game;
 let isGameOver = false;
+let pulse = 0;
 
 // ================= START GAME =================
 function startGame() {
@@ -38,7 +39,9 @@ function randomFood() {
 function loopSnake() {
   if (isGameOver) return;
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // background
+  ctx.fillStyle = "#ecf0f1";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   drawGrid();
 
@@ -80,6 +83,8 @@ function loopSnake() {
     snake.pop();
   }
 
+  pulse += 0.2;
+
   drawFood();
   drawSnake();
   drawScore();
@@ -89,37 +94,50 @@ function loopSnake() {
 
 function drawSnake() {
   snake.forEach((segment, index) => {
-    if (index === 0) {
-      // head
-      ctx.fillStyle = "#2c3e50";
-    } else {
-      ctx.fillStyle = "#8e44ad";
-    }
-    ctx.fillRect(segment.x, segment.y, box, box);
+    ctx.fillStyle = index === 0 ? "#1abc9c" : "#16a085";
+    roundRect(segment.x, segment.y, box, box, 3);
+    ctx.fill();
   });
 }
 
 function drawFood() {
+  let size = box + Math.sin(pulse) * 2;
+
   ctx.fillStyle = "#e74c3c";
-  ctx.fillRect(food.x, food.y, box, box);
+  ctx.beginPath();
+  ctx.arc(
+    food.x + box / 2,
+    food.y + box / 2,
+    size / 2,
+    0,
+    Math.PI * 2
+  );
+  ctx.fill();
 }
 
 function drawScore() {
-  ctx.fillStyle = "black";
-  ctx.font = "16px Arial";
+  ctx.fillStyle = "rgba(0,0,0,0.6)";
+  ctx.fillRect(5, 5, 120, 40);
+
+  ctx.fillStyle = "white";
+  ctx.font = "14px Arial";
   ctx.textAlign = "left";
+
   ctx.fillText("Score: " + score, 10, 20);
-  ctx.fillText("High: " + highScore, 10, 40);
+  ctx.fillText("High: " + highScore, 10, 35);
 }
 
 function drawGrid() {
-  ctx.strokeStyle = "#eee";
+  ctx.strokeStyle = "rgba(0,0,0,0.05)";
+  ctx.lineWidth = 1;
+
   for (let i = 0; i < canvas.width; i += box) {
     ctx.beginPath();
     ctx.moveTo(i, 0);
     ctx.lineTo(i, canvas.height);
     ctx.stroke();
   }
+
   for (let i = 0; i < canvas.height; i += box) {
     ctx.beginPath();
     ctx.moveTo(0, i);
@@ -144,25 +162,43 @@ function gameOver() {
 }
 
 function drawGameOver() {
-  // overlay
-  ctx.fillStyle = "rgba(0,0,0,0.6)";
+  ctx.fillStyle = "rgba(0,0,0,0.7)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = "#2c3e50";
+  ctx.fillRect(canvas.width / 2 - 100, canvas.height / 2 - 60, 200, 120);
 
   ctx.fillStyle = "white";
   ctx.textAlign = "center";
 
-  ctx.font = "28px Arial";
+  ctx.font = "22px Arial";
   ctx.fillText("Game Over", canvas.width / 2, canvas.height / 2 - 20);
 
-  ctx.font = "18px Arial";
+  ctx.font = "16px Arial";
   ctx.fillText("Score: " + score, canvas.width / 2, canvas.height / 2 + 10);
 
-  ctx.font = "14px Arial";
+  ctx.font = "12px Arial";
   ctx.fillText(
-    "Click Restart to play again",
+    "Click Restart",
     canvas.width / 2,
     canvas.height / 2 + 40
   );
+}
+
+// ================= HELPERS =================
+
+function roundRect(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
 }
 
 // ================= CONTROLS =================
